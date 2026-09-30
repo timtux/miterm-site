@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Miterm is a native macOS terminal for Claude Code that puts idle sessions to sleep, times everything by the prompt cache and only asks for you when a session needs you.">
+<link rel="icon" href="icon.png">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Miterm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f3f5f2; --surface:#ffffff; --ink:#15191a; --muted:#5d6763; --line:#dde3df;
+  --led:#1f9d45; --led-dim:#b9dcc3; --bell:#b86e0a; --panel:#10140f; --panel-ink:#dfe8e1; --panel-muted:#7f8c84;
+  --display:"Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --body:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme:dark; --bg:#0c0f0d; --surface:#141915; --ink:#e7ede8; --muted:#94a199; --line:#243029;
+  --led:#3ee26a; --led-dim:#1d4a2a; --bell:#f2b35b; --panel:#060806; --panel-ink:#dfe8e1; --panel-muted:#7f8c84; }}
+:root[data-theme="dark"]{ color-scheme:dark; --bg:#0c0f0d; --surface:#141915; --ink:#e7ede8; --muted:#94a199; --line:#243029;
+  --led:#3ee26a; --led-dim:#1d4a2a; --bell:#f2b35b; --panel:#060806; --panel-ink:#dfe8e1; --panel-muted:#7f8c84; }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-inline:20px}
+.wrap{max-width:1080px;margin:0 auto}
+header.top{display:flex;align-items:center;gap:12px;padding-block:22px}
+header.top img{width:34px;height:34px;border-radius:8px}
+header.top b{font:700 20px var(--display);letter-spacing:.01em}
+header.top span{margin-left:auto;font:500 12px var(--mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding-block:40px 72px}
+h1{font:700 clamp(38px,6vw,64px)/1.02 var(--display);letter-spacing:-.02em;margin:0 0 20px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--led)}
+.lede{font-size:19px;color:var(--muted);max-width:34em;margin:0 0 26px}
+.status{display:inline-flex;gap:10px;align-items:center;font:500 13px var(--mono);border:1px solid var(--line);border-radius:999px;padding:7px 14px;color:var(--muted)}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--bell)}
+/* the sidebar, as Miterm draws it */
+.win{background:var(--panel);color:var(--panel-ink);border-radius:14px;padding:16px 14px 12px;font:13px/1.35 var(--body);box-shadow:0 24px 60px -20px rgba(0,0,0,.45);max-width:100%}
+.lights{display:flex;gap:7px;margin-bottom:14px}.lights i{width:11px;height:11px;border-radius:50%;background:#3a3f3b}
+.grp{font:500 11px var(--mono);color:var(--panel-muted);letter-spacing:.06em;margin:10px 6px 6px}
+.row{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:center;padding:7px 8px;border-radius:8px}
+.row.sel{background:rgba(255,255,255,.07)}
+.row small{display:block;color:var(--panel-muted);font-size:11.5px}
+.row .meta{font:500 11px var(--mono);color:var(--panel-muted);text-align:right}
+.g{width:12px;height:12px;border-radius:50%;justify-self:center}
+.g.work{border:2px solid #3ee26a;border-right-color:transparent;animation:spin 1s linear infinite}
+.g.idle{background:#3ee26a}
+.g.bell{background:#f2b35b}
+.g.sleep{background:none;border:1.5px solid #6d7a72}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.g.work{animation:none}}
+.meter{display:flex;gap:3px;margin:14px 8px 4px;align-items:flex-end;height:22px}
+.meter i{flex:1;background:#1d4a2a;border-radius:2px}
+.meter i.on{background:#3ee26a}
+.meterlab{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--panel-muted);margin:0 8px}
+section{padding-block:56px;border-top:1px solid var(--line)}
+h2{font:700 clamp(26px,3.4vw,36px)/1.1 var(--display);letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
+.kick{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--led);margin:0 0 10px}
+.intro{color:var(--muted);max-width:40em;margin:0 0 32px;font-size:17px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.goal h3{font:700 22px var(--display);margin:0 0 10px}
+.goal ul{margin:0;padding-left:18px;color:var(--muted)} .goal li{margin-bottom:8px} .goal li b{color:var(--ink);font-weight:600}
+.num{font:500 14px var(--mono);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 32px}
+.feat h3{font:600 17px var(--body);margin:0 0 6px}
+.feat p{margin:0;color:var(--muted);font-size:15px}
+.cmp{width:100%;border-collapse:collapse;font-size:15px}
+.cmpwrap{overflow-x:auto}
+.cmp th,.cmp td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp th{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cmp td:first-child{font-weight:600;white-space:nowrap}
+.cmp td.us{color:var(--ink)} .cmp td.them{color:var(--muted)}
+.dream{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
+.dream ul{margin:0;padding-left:18px;color:var(--muted)} .dream li{margin-bottom:10px} .dream li b{color:var(--ink);font-weight:600}
+.log{background:var(--panel);color:var(--panel-ink);border-radius:12px;padding:16px 18px;font:13px/1.55 var(--mono);max-width:100%;overflow-x:auto}
+.log .t{color:var(--panel-muted)} .log .ok{color:#3ee26a} .log .rv{color:#f2b35b}
+.soon{display:inline-block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--bell);border:1px solid var(--bell);border-radius:999px;padding:2px 9px;margin-left:10px;vertical-align:middle}
+@media (max-width:820px){.dream{grid-template-columns:1fr}}
+footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
+@media (max-width:820px){.hero,.two{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.grid{grid-template-columns:1fr}.lede{font-size:17px}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header class="top"><img alt="" src="data:image/png;base64,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"><b>Miterm</b><span>A Mac terminal for Claude Code</span></header>
+
+<div class="hero">
+  <div>
+    <h1>Run twenty Claude Code sessions. <em>Pay for the ones that work.</em></h1>
+    <p class="lede">Miterm is a native macOS terminal built around Claude Code. It puts idle sessions to sleep, times everything by the prompt cache, and only asks for you when a session actually needs you.</p>
+    <span class="status"><i></i>In development · not released yet</span>
+  </div>
+  <div class="win" aria-label="Miterm's sidebar with sessions in different states">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div class="grp">~/Development</div>
+    <div class="row sel"><span class="g work"></span><div>Payments API<small>working · Sonnet</small></div><span class="meta">cache 52 min</span></div>
+    <div class="row"><span class="g bell"></span><div>Checkout redesign<small>wants you to pick a layout</small></div><span class="meta">now</span></div>
+    <div class="row"><span class="g idle"></span><div>Release notes<small>done · waiting</small></div><span class="meta">cache 9 min</span></div>
+    <div class="row"><span class="g sleep"></span><div>Search index<small>asleep · 0 MB</small></div><span class="meta">1 h 40</span></div>
+    <div class="row"><span class="g sleep"></span><div>Docs site<small>asleep · 0 MB</small></div><span class="meta">3 h</span></div>
+    <div class="meter" aria-hidden="true"><i class="on" style="height:30%"></i><i class="on" style="height:45%"></i><i class="on" style="height:60%"></i><i class="on" style="height:50%"></i><i style="height:70%"></i><i style="height:85%"></i><i style="height:100%"></i><i style="height:90%"></i></div>
+    <div class="meterlab"><span>5-hour limit 41 %</span><span>week 11 %</span></div>
+  </div>
+</div>
+
+<section>
+  <p class="kick">Why it exists</p>
+  <h2>Two promises, and every feature has to serve one of them.</h2>
+  <p class="intro">Most tools for AI coding add more ways to start agents. Miterm is about what happens after: keeping many long-running sessions cheap, and keeping you out of the babysitting.</p>
+  <div class="two">
+    <div class="goal"><h3>Lower the cost</h3><ul>
+      <li><b>Sleep before the cache expires.</b> A cached conversation is read at <span class="num">0.1×</span>; once it expires the next message rewrites all of it at <span class="num">2×</span>. Miterm compacts a large idle tab and puts it to sleep minutes before that happens.</li>
+      <li><b>Keep awake tabs warm.</b> A pinned or selected tab gets a one-word ping before its cache runs out, instead of a full rewrite later.</li>
+      <li><b>Know your plan limits.</b> The 5-hour and weekly windows are tracked per request, so you see what a model or a cache setting really costs you.</li>
+    </ul></div>
+    <div class="goal"><h3>Lower the load on you</h3><ul>
+      <li><b>One bell, when it matters.</b> A small assistant reads what each session finished and rings only when a session needs a decision from you.</li>
+      <li><b>Nothing to track by hand.</b> Sessions wake exactly where they were, loops and goals stay awake, Remote Control reconnects on its own.</li>
+      <li><b>Decides instead of asking.</b> Miterm acts and keeps it undoable, with a log line and a revert, rather than adding another setting or prompt.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section>
+  <p class="kick">What it does</p>
+  <h2>Built for sessions that run for days.</h2>
+  <div class="grid" style="margin-top:28px">
+    <div class="feat"><h3>Hibernation</h3><p>Idle Claude Code sessions are ended safely and resumed on demand, freeing their memory. Nothing that is still working is ever touched.</p></div>
+    <div class="feat"><h3>Cache clock</h3><p>Every tab shows when its prompt cache expires, read from Claude Code's own status line.</p></div>
+    <div class="feat"><h3>Subagent rows</h3><p>Background agents appear under their session with model, tokens and time, and waiting agents are kept warm.</p></div>
+    <div class="feat"><h3>Teammates in tabs</h3><p>Claude Code agent teams open as tabs of their own under the lead session.</p></div>
+    <div class="feat"><h3>Notes before compaction</h3><p>A session writes down what it learned into its project's CLAUDE.md before it is compacted or put to sleep.</p></div>
+    <div class="feat"><h3>Action log</h3><p>Everything Miterm did on its own, with who asked and why, in one place.</p></div>
+  </div>
+</section>
+
+<section>
+  <p class="kick">Coming next</p>
+  <h2>Dreaming<span class="soon">in the works</span></h2>
+  <p class="intro">Every session writes down what it learned before it is compacted or put to sleep. Over weeks those notes pile up: the same rule in three wordings, old facts that were later proven wrong, long stories where one line would do. And every one of those lines is sent with every request, in every session.</p>
+  <div class="dream">
+    <ul>
+      <li><b>Consolidates while you sleep.</b> Miterm merges what all sessions in a project learned into one tighter set of instructions: duplicates merged, contradictions resolved, stories cut to the rule they proved.</li>
+      <li><b>Runs on budget you would lose anyway.</b> It dreams when a plan window is about to reset with budget left over, so it costs you nothing you would have used.</li>
+      <li><b>Applies itself, and keeps every version.</b> No approval step. Miterm keeps its own history of every CLAUDE.md it touches, and any dream can be reverted with one click.</li>
+      <li><b>Careful by construction.</b> It never deletes a file, caps how much one pass may cut, and refuses a version where a rule disappears without being merged into another.</li>
+    </ul>
+    <div class="log" aria-label="Example action log after a dream">
+      <div><span class="t">04:52</span> dream · Checkout redesign</div>
+      <div class="ok">CLAUDE.md  48 KB → 29 KB</div>
+      <div>  11 duplicates merged</div>
+      <div>  3 contradictions resolved</div>
+      <div>  14 stories cut to their rule</div>
+      <div class="rv">  ↺ revert to previous version</div>
+      <br>
+      <div><span class="t">04:53</span> dream · Payments API</div>
+      <div class="ok">CLAUDE.md  21 KB → 17 KB</div>
+      <div>  4 duplicates merged</div>
+      <div class="rv">  ↺ revert to previous version</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="kick">Coming next</p>
+  <h2>A memory of all your sessions<span class="soon">in the works</span></h2>
+  <p class="intro">Every conversation you have had with Claude Code stays on your Mac as a transcript nobody reads again. Miterm turns them into one memory you can ask.</p>
+  <div class="grid">
+    <div class="feat"><h3>Search by meaning</h3><p>Find "when did we decide how the cache works" without remembering the words, across every project and every session.</p></div>
+    <div class="feat"><h3>On your Mac only</h3><p>Indexed and embedded on-device with Apple's own language models. Nothing leaves the machine, and there is no service to install.</p></div>
+    <div class="feat"><h3>Feeds dreaming</h3><p>What ten sessions learned in their own words is recognised as the same lesson, so dreaming can merge it into one rule.</p></div>
+  </div>
+</section>
+
+<section>
+  <p class="kick">Native, not a web page</p>
+  <h2>Written in Swift for the Mac.</h2>
+  <p class="intro">Claude Code on the Mac is either a bare terminal or an Electron app. Miterm is a real terminal underneath, so all of Claude Code keeps working, with the Mac's own notifications, windows and full screen on top.</p>
+  <div class="cmpwrap"><table class="cmp">
+    <tr><th></th><th>Miterm</th><th>A plain terminal</th><th>A web-based app</th></tr>
+    <tr><td>Built with</td><td class="us">Swift and AppKit</td><td class="them">native, but knows nothing about Claude</td><td class="them">JavaScript in a browser shell</td></tr>
+    <tr><td>Idle sessions</td><td class="us">sleep and wake where they were</td><td class="them">stay in memory</td><td class="them">stay in memory</td></tr>
+    <tr><td>Prompt cache</td><td class="us">timed, kept warm or compacted</td><td class="them">left to expire</td><td class="them">left to expire</td></tr>
+    <tr><td>Needs you</td><td class="us">one bell with the reason</td><td class="them">you check each tab</td><td class="them">you check each chat</td></tr>
+  </table></div>
+</section>
+
+<footer><span>Miterm · macOS · in development</span><span>Not affiliated with Anthropic. Claude and Claude Code are Anthropic's.</span></footer>
+</div>
+
+</body>
+</html>
