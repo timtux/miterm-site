@@ -77,6 +77,13 @@ h2{font:700 clamp(26px,3.4vw,36px)/1.1 var(--display);letter-spacing:-.01em;marg
 .log .t{color:var(--panel-muted)} .log .ok{color:#3ee26a} .log .rv{color:#f2b35b}
 .soon{display:inline-block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--bell);border:1px solid var(--bell);border-radius:999px;padding:2px 9px;margin-left:10px;vertical-align:middle}
 @media (max-width:820px){.dream{grid-template-columns:1fr}}
+code{font-family:var(--mono);font-size:.88em}
+.cmp td.pick{white-space:nowrap;font-weight:600}
+.cmp td.pick span{display:block;font:500 13px var(--mono);color:var(--led)}
+.rules{margin:0;padding-left:20px;color:var(--muted)} .rules li{margin-bottom:10px} .rules li b{color:var(--ink);font-weight:600}
+.fine{color:var(--muted);font-size:14px;margin:18px 0 0}
+.models td:first-child{white-space:normal}
+@media (max-width:520px){.models tr:first-child{display:none}.models tr{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--line)}.models td{border:0;padding:0}.models td.pick{text-align:right}.models td.them{grid-column:1/-1}}
 footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 @media (max-width:820px){.hero,.two{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.grid{grid-template-columns:1fr}.lede{font-size:17px}}
@@ -114,12 +121,15 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
   <div class="two">
     <div class="goal"><h3>Lower the cost</h3><ul>
       <li><b>Sleep before the cache expires.</b> A cached conversation is read at <span class="num">0.1×</span>; once it expires the next message rewrites all of it at <span class="num">2×</span>. Miterm compacts a large idle tab and puts it to sleep minutes before that happens.</li>
-      <li><b>Keep awake tabs warm.</b> A pinned or selected tab gets a one-word ping before its cache runs out, instead of a full rewrite later.</li>
+      <li><b>Keep awake tabs warm, silently.</b> A pinned or selected tab has its cache renewed just before it runs out, through Claude Code's own plugin API: no turn, no line in your conversation. And only as often as the tab is likely to be used again.</li>
+      <li><b>Leave unused MCP servers off.</b> Servers a folder has not called all week don't start in its sessions, so their tool lists stay out of every request. One command turns them back on.</li>
+      <li><b>The right model for the job.</b> New sessions start on the model and effort the work calls for, and Miterm switches a tab only when the switch is cheap. <a href="#models">Which model for what</a>.</li>
       <li><b>Know your plan limits.</b> The 5-hour and weekly windows are tracked per request, so you see what a model or a cache setting really costs you.</li>
     </ul></div>
     <div class="goal"><h3>Lower the load on you</h3><ul>
       <li><b>One bell, when it matters.</b> A small assistant reads what each session finished and rings only when a session needs a decision from you.</li>
       <li><b>Nothing to track by hand.</b> Sessions wake exactly where they were, loops and goals stay awake, Remote Control reconnects on its own.</li>
+      <li><b>Never types over your draft.</b> Miterm's own commands reach Claude Code through its plugin API, not as keystrokes, so a half-written message stays exactly as you left it.</li>
       <li><b>Decides instead of asking.</b> Miterm acts and keeps it undoable, with a log line and a revert, rather than adding another setting or prompt.</li>
     </ul></div>
   </div>
@@ -131,58 +141,89 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
   <div class="grid" style="margin-top:28px">
     <div class="feat"><h3>Hibernation</h3><p>Idle Claude Code sessions are ended safely and resumed on demand, freeing their memory. Nothing that is still working is ever touched.</p></div>
     <div class="feat"><h3>Cache clock</h3><p>Every tab shows when its prompt cache expires, read from Claude Code's own status line.</p></div>
-    <div class="feat"><h3>Subagent rows</h3><p>Background agents appear under their session with model, tokens and time, and waiting agents are kept warm.</p></div>
+    <div class="feat"><h3>Subagent rows</h3><p>Background agents appear under their session with model, tokens and time. Click one to read its conversation while it works.</p></div>
     <div class="feat"><h3>Teammates in tabs</h3><p>Claude Code agent teams open as tabs of their own under the lead session.</p></div>
+    <div class="feat"><h3>Messages wake sleepers</h3><p>A session that sends a message to a sleeping tab by name wakes it, and the message arrives once the tab is up.</p></div>
+    <div class="feat"><h3>Sleepers out of the way</h3><p>Sleeping tabs sit last in their folder, most recent first, with the rest behind "Show more".</p></div>
     <div class="feat"><h3>Notes before compaction</h3><p>A session writes down what it learned into its project's CLAUDE.md before it is compacted or put to sleep.</p></div>
     <div class="feat"><h3>Action log</h3><p>Everything Miterm did on its own, with who asked and why, in one place.</p></div>
+    <div class="feat"><h3>Inspector</h3><p>Each tab's model and effort, size, cost and cache misses, and every switch Miterm made, with a Revert.</p></div>
   </div>
 </section>
 
+<section id="models">
+  <p class="kick">Model and effort</p>
+  <h2>Which model for which job.</h2>
+  <p class="intro">A new session starts on the pick below unless you name a model yourself. After a compaction, Miterm checks whether the tab's work still fits its model, and switches it at a moment when that is cheap. Nothing is saved to your Claude Code settings, and every switch can be reverted from the inspector.</p>
+  <div class="cmpwrap"><table class="cmp models">
+    <tr><th>Work</th><th>Model and effort</th><th>Why</th></tr>
+    <tr><td>Coding that runs on its own (agents building to a plan)</td><td class="pick">Sonnet 5.5<span>xhigh</span></td><td class="them">Close to the best coding results, at a fraction of the cost and time of Opus at its maximum</td></tr>
+    <tr><td>Desktop and MCP tool work (CAD, 3D, design apps)</td><td class="pick">Opus 5.5<span>high</span></td><td class="them">Near the best result for well under half the cost of max; Sonnet costs more here, not less</td></tr>
+    <tr><td>Planning, architecture, hard reasoning, code review</td><td class="pick">Opus 5.5<span>xhigh</span></td><td class="them">The strongest reasoning short of max, for about half its cost</td></tr>
+    <tr><td>A chat you follow along with</td><td class="pick">Opus 5.5<span>medium</span></td><td class="them">Anthropic's default. You are the double-check; go to high if corrections pile up</td></tr>
+    <tr><td>Small, simple jobs (expanding a search, sorting)</td><td class="pick">Haiku 4.5</td><td class="them">The only model cheaper per task than Opus 5.5 on low</td></tr>
+  </table></div>
+  <div class="two" style="margin-top:36px">
+    <div class="goal"><h3>Rules of thumb</h3><ol class="rules">
+      <li><b>Cost per task, not per token.</b> A cheaper model that writes more and takes more turns can cost more per finished task.</li>
+      <li><b>Cache reads are most of the bill.</b> Cost follows turns times context size, so effort moves it more than the model's price does.</li>
+      <li><b>Switch models only at a free moment:</b> a new session, a wake, right after a compaction. Each model has its own cache. Effort can change any time and keeps the cache.</li>
+      <li><b>Raise effort</b> when Claude skips a file, doesn't run the tests or doesn't double-check its work.</li>
+    </ol></div>
+    <div class="goal"><h3>Avoid</h3><ul>
+      <li><b>Medium or low effort</b> for work nobody watches.</li>
+      <li><b>Max effort</b>, unless the last few points are worth twice the cost.</li>
+      <li><b>Older models</b> (Opus 5 and 4.8, Sonnet 5 and 4.x): some level of Opus 5.5 is both better and cheaper.</li>
+      <li><b>Fable 5.1</b>: it cost more for the same work in every comparison we read.</li>
+      <li><b><code>/model &lt;name&gt;</code> and <code>/effort &lt;level&gt;</code></b>: both save as your default. For this session only, type <code>/model</code> or <code>/effort</code> alone, pick with ←/→ and press <code>s</code>.</li>
+    </ul></div>
+  </div>
+  <p class="fine">From public benchmarks and our own measurements, October 2026. Models change, and so will this table.</p>
+</section>
+
 <section>
-  <p class="kick">Coming next</p>
-  <h2>Dreaming<span class="soon">in the works</span></h2>
+  <p class="kick">Tidies itself</p>
+  <h2>Dreaming</h2>
   <p class="intro">Every session writes down what it learned before it is compacted or put to sleep. Over weeks those notes pile up: the same rule in three wordings, old facts that were later proven wrong, long stories where one line would do. And every one of those lines is sent with every request, in every session.</p>
   <div class="dream">
     <ul>
-      <li><b>Consolidates while you sleep.</b> Miterm merges what all sessions in a project learned into one tighter set of instructions: duplicates merged, contradictions resolved, stories cut to the rule they proved.</li>
-      <li><b>Runs on budget you would lose anyway.</b> It dreams when a plan window is about to reset with budget left over, so it costs you nothing you would have used.</li>
-      <li><b>Applies itself, and keeps every version.</b> No approval step. Miterm keeps its own history of every CLAUDE.md it touches, and any dream can be reverted with one click.</li>
-      <li><b>Careful by construction.</b> It never deletes a file, caps how much one pass may cut, and refuses a version where a rule disappears without being merged into another.</li>
+      <li><b>Tightens what has grown.</b> Miterm rewrites a CLAUDE.md that has grown since it last looked: rules that say the same thing merged, old numbers replaced by newer ones, rules a parent file already states dropped.</li>
+      <li><b>Runs on budget you would lose anyway.</b> It dreams on the last day before your weekly limit resets, and only when the week is heading for budget it will never use.</li>
+      <li><b>Applies itself, and keeps every version.</b> No approval step. Miterm keeps its own history of every CLAUDE.md it knows, and Settings shows each dream's changes with a Revert.</li>
+      <li><b>Careful by construction.</b> One pass never cuts more than a fifth, every heading, number and name survives, a version where a rule disappears is refused, and a file you edited meanwhile is left alone.</li>
     </ul>
     <div class="log" aria-label="Example action log after a dream">
       <div><span class="t">04:52</span> dream · Checkout redesign</div>
-      <div class="ok">CLAUDE.md  48 KB → 29 KB</div>
-      <div>  11 duplicates merged</div>
-      <div>  3 contradictions resolved</div>
-      <div>  14 stories cut to their rule</div>
+      <div class="ok">CLAUDE.md  48 KB → 39 KB</div>
+      <div>  rules merged, old numbers replaced</div>
       <div class="rv">  ↺ revert to previous version</div>
       <br>
       <div><span class="t">04:53</span> dream · Payments API</div>
       <div class="ok">CLAUDE.md  21 KB → 17 KB</div>
-      <div>  4 duplicates merged</div>
+      <div>  rules a parent file states dropped</div>
       <div class="rv">  ↺ revert to previous version</div>
     </div>
   </div>
 </section>
 
 <section>
-  <p class="kick">Coming next</p>
-  <h2>A memory of all your sessions<span class="soon">in the works</span></h2>
-  <p class="intro">Every conversation you have had with Claude Code stays on your Mac as a transcript nobody reads again. Miterm turns them into one memory you can ask.</p>
+  <p class="kick">Memory</p>
+  <h2>Every session you ever had, one keystroke away.</h2>
+  <p class="intro">Every conversation you have had with Claude Code stays on your Mac as a transcript nobody reads again. Miterm makes them findable, by you and by your sessions.</p>
   <div class="grid">
-    <div class="feat"><h3>Search by meaning</h3><p>Find "when did we decide how the cache works" without remembering the words, across every project and every session.</p></div>
-    <div class="feat"><h3>On your Mac only</h3><p>Indexed and embedded on-device with Apple's own language models. Nothing leaves the machine, and there is no service to install.</p></div>
-    <div class="feat"><h3>Feeds dreaming</h3><p>What ten sessions learned in their own words is recognised as the same lesson, so dreaming can merge it into one rule.</p></div>
+    <div class="feat"><h3>All of it in ⌘P</h3><p>Open tabs and every conversation on disk, by title, folder and what was said. Recently closed comes first, so ⌘P and Return reopens the tab you just closed.</p></div>
+    <div class="feat"><h3>Search by meaning</h3><p>Type what you remember, not the exact words. When the words find little, a small Claude model on your own login widens the search to the words such a session would have used.</p></div>
+    <div class="feat"><h3>Sessions can look back</h3><p>Ask a session what an earlier one decided, and <code>/miterm:recall</code> lets it search its own project's past conversations.</p></div>
   </div>
 </section>
 
 <section>
-  <p class="kick">Coming next</p>
-  <h2>Later, when the budget is free<span class="soon">in the works</span></h2>
+  <p class="kick">Spare budget</p>
+  <h2>Later, when the budget is free</h2>
   <p class="intro">Batch APIs give a discount for work that can wait. A Claude plan has its own version: budget left over when the week resets is simply gone. Type <code>/miterm:later</code> after a task that isn't urgent, and Miterm runs it when that budget would otherwise be lost.</p>
   <div class="grid">
     <div class="feat"><h3>Park it in one line</h3><p>The session writes the task down as one self-contained paragraph and ends its turn. Nothing keeps the tab awake while it waits.</p></div>
-    <div class="feat"><h3>Runs on spare budget</h3><p>Miterm starts it when the week is heading for unused budget, a five-hour window is ending with room to spare, or a fresh window has just opened.</p></div>
+    <div class="feat"><h3>Runs on spare budget</h3><p>Miterm starts it only when the week is heading for budget it will never use, then at a fresh five-hour window or one about to end with room to spare. Every check is in the log with its projection.</p></div>
     <div class="feat"><h3>Held by Miterm, not the session</h3><p>The wish survives quitting, restarts and sleep. A sleeping tab is woken, and the task is typed in once it's idle. Run now or forget it from the inspector.</p></div>
   </div>
 </section>
