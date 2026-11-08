@@ -6,9 +6,19 @@
 <meta name="description" content="Miterm is a native macOS terminal for Claude Code that puts idle sessions to sleep, times everything by the prompt cache and only asks for you when a session needs you.">
 <link rel="icon" href="icon.png">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Miterm</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Miterm: a Mac terminal for Claude Code</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Miterm: a Mac terminal for Claude Code">
+<meta property="og:description" content="Miterm is a native macOS terminal for Claude Code that puts idle sessions to sleep, times everything by the prompt cache and only asks for you when a session needs you.">
+<meta property="og:url" content="https://timtux.github.io/miterm-site/">
+<meta property="og:image" content="https://timtux.github.io/miterm-site/icon.png">
+<meta name="twitter:card" content="summary">
+<style>
+@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 500; font-stretch: 100%; font-display: swap; src: url(fonts/bricolage-grotesque-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 700; font-stretch: 100%; font-display: swap; src: url(fonts/bricolage-grotesque-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-mono-400-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/ibm-plex-mono-500-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+</style>
 <style>
 :root{
   --bg:#f3f5f2; --surface:#ffffff; --ink:#15191a; --muted:#5d6763; --line:#dde3df;
@@ -61,7 +71,7 @@ h2{font:700 clamp(26px,3.4vw,36px)/1.1 var(--display);letter-spacing:-.01em;marg
 .two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 .goal h3{font:700 22px var(--display);margin:0 0 10px}
 .goal ul{margin:0;padding-left:18px;color:var(--muted)} .goal li{margin-bottom:8px} .goal li b{color:var(--ink);font-weight:600}
-.num{font:500 14px var(--mono);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.num{font:500 14px var(--mono);color:var(--ink);white-space:nowrap}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 32px}
 .feat h3{font:600 17px var(--body);margin:0 0 6px}
 .feat p{margin:0;color:var(--muted);font-size:15px}
@@ -86,7 +96,8 @@ code{font-family:var(--mono);font-size:.88em}
 @media (max-width:520px){.models tr:first-child{display:none}.models tr{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--line)}.models td{border:0;padding:0}.models td.pick{text-align:right}.models td.them{grid-column:1/-1}}
 footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 @media (max-width:820px){.hero,.two{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}
-@media (max-width:520px){.grid{grid-template-columns:1fr}.lede{font-size:17px}}
+@media (max-width:520px){.grid{grid-template-columns:1fr}.lede{font-size:17px}header.top span{display:none}}
+.needs{display:block;margin-top:12px;font:500 13px var(--mono);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -100,6 +111,7 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
     <h1>Run twenty Claude Code sessions. <em>Pay for the ones that work.</em></h1>
     <p class="lede">Miterm is a native macOS terminal built around Claude Code. It puts idle sessions to sleep, times everything by the prompt cache, and only asks for you when a session actually needs you.</p>
     <span class="status"><i></i>In development · not released yet</span>
+    <span class="needs">macOS 26 · Apple silicon · Claude Code</span>
   </div>
   <div class="win" aria-label="Miterm's sidebar with sessions in different states">
     <div class="lights"><i></i><i></i><i></i></div>
@@ -126,11 +138,12 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
       <li><b>Compact before it runs away.</b> A conversation can grow through a single long turn, and every request re-reads all of it. Miterm's sessions compact themselves well before that gets expensive, unless you set a window of your own.</li>
       <li><b>The right model for the job.</b> New sessions start on the model and effort their folder's work has called for, and Miterm switches a tab only when the switch is cheap. <a href="#models">Which model for what</a>.</li>
       <li><b>Know your plan limits.</b> The 5-hour and weekly windows are tracked per request, so you see what a model or a cache setting really costs you.</li>
+      <li><b>Miterm spends too, and says so.</b> Its assistant and the notes sessions write run on your own Claude login and count against your plan. Dreams and parked tasks use only budget that would otherwise go unused.</li>
     </ul></div>
     <div class="goal"><h3>Lower the load on you</h3><ul>
       <li><b>One bell, when it matters.</b> An assistant on your own Claude login reads what each session finished and rings only when a session needs a decision from you.</li>
-      <li><b>Nothing to track by hand.</b> Sessions wake exactly where they were, loops and goals stay awake, Remote Control reconnects on its own.</li>
-      <li><b>Never types over your draft.</b> Miterm's own commands reach Claude Code through its plugin API, not as keystrokes, so a half-written message stays exactly as you left it.</li>
+      <li><b>Nothing to track by hand.</b> Sessions wake with their conversation intact, loops and goals keep running, Remote Control reconnects on its own.</li>
+      <li><b>Never types over your draft.</b> Miterm reaches Claude Code through its plugin API where it can and never types while you have a draft, so a half-written message stays exactly as you left it.</li>
       <li><b>Decides instead of asking.</b> Miterm acts and keeps it undoable, with a log line and a revert, rather than adding another setting or prompt.</li>
     </ul></div>
   </div>
@@ -140,7 +153,7 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
   <p class="kick">What it does</p>
   <h2>Built for sessions that run for days.</h2>
   <div class="grid" style="margin-top:28px">
-    <div class="feat"><h3>Hibernation</h3><p>Idle Claude Code sessions are ended safely and resumed on demand, freeing their memory, in the project their work moved to, with a Move Back. Nothing that is still working is ever touched.</p></div>
+    <div class="feat"><h3>Hibernation</h3><p>Idle Claude Code sessions are ended safely and resumed on demand, freeing their memory. A tab can wake in the project its work moved to, and Move Back undoes it. Nothing that is still working is ever touched.</p></div>
     <div class="feat"><h3>Cache clock</h3><p>Every tab shows when its prompt cache expires, read from Claude Code's own status line.</p></div>
     <div class="feat"><h3>Subagent rows</h3><p>Background agents appear under their session with model, tokens and time. Click one to read its conversation while it works.</p></div>
     <div class="feat"><h3>Team members</h3><p>Right-click a conversation to start a member in its own tab, nested under its lead. Leads can start, rename and answer their members and switch their model, and members report back by message.</p></div>
@@ -158,7 +171,7 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
 <section id="models">
   <p class="kick">Model and effort</p>
   <h2>Which model for which job.</h2>
-  <p class="intro">A new session starts on a default from the table below, or on what its folder's last sessions settled on, unless you name a model yourself. After a compaction, Miterm checks whether the tab's work still fits its model, and switches it at a moment when that is cheap. Nothing is saved to your Claude Code settings, and every switch can be reverted from the inspector.</p>
+  <p class="intro">A new session starts on the chat pick below, or on what its folder's last sessions settled on, unless you name a model yourself. After a compaction, Miterm checks whether the tab's work still fits its model, and switches it at a moment when that is cheap. Nothing is saved to your Claude Code settings, and every switch can be reverted from the inspector.</p>
   <div class="cmpwrap"><table class="cmp models">
     <tr><th>Work</th><th>Model and effort</th><th>Why</th></tr>
     <tr><td>Coding that runs on its own (agents building to a plan)</td><td class="pick">Sonnet 5.5<span>xhigh</span></td><td class="them">Close to the best coding results, at a fraction of the cost and time of Opus at its maximum</td></tr>
@@ -192,7 +205,7 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
   <div class="dream">
     <ul>
       <li><b>Tightens what has grown.</b> Miterm goes through a CLAUDE.md that has grown, entry by entry: rules that say the same thing merged, long stories condensed to the rule they taught, old status and evidence moved to <code>CLAUDE.history.md</code>, open work to the project's backlog.</li>
-      <li><b>Runs on budget you would lose anyway.</b> It dreams on the last day before your weekly limit resets, or earlier when a quarter of the week is heading to waste, and at most three files a week.</li>
+      <li><b>Runs on budget you would lose anyway.</b> It dreams only when the week is heading for budget it won't use: on the last day before the reset, or earlier when a quarter would go to waste. At most three files a week.</li>
       <li><b>Applies itself, and keeps every version.</b> No approval step. Miterm keeps its own history of every CLAUDE.md it knows, and Settings shows each dream's changes with a Revert.</li>
       <li><b>Careful by construction.</b> A rewrite keeps every number and name, a rule never leaves the file, whatever moves out goes word for word to the history file, and a file you edited meanwhile is left alone.</li>
     </ul>
@@ -247,7 +260,7 @@ footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--mute
 <section>
   <p class="kick">Native, not a web page</p>
   <h2>Written in Swift for the Mac.</h2>
-  <p class="intro">Claude Code on the Mac is either a bare terminal or an Electron app. Miterm is a real terminal underneath, so all of Claude Code keeps working, with the Mac's own notifications, windows and full screen on top.</p>
+  <p class="intro">Claude Code on the Mac usually runs in a plain terminal or a web-based app. Miterm is a real terminal underneath, so all of Claude Code keeps working, with the Mac's own notifications, windows and full screen on top.</p>
   <div class="cmpwrap"><table class="cmp">
     <tr><th></th><th>Miterm</th><th>A plain terminal</th><th>A web-based app</th></tr>
     <tr><td>Built with</td><td class="us">Swift and AppKit</td><td class="them">native, but knows nothing about Claude</td><td class="them">JavaScript in a browser shell</td></tr>
