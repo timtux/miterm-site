@@ -91,6 +91,13 @@ h2{font:700 clamp(30px,4.2vw,44px)/1.08 var(--display);letter-spacing:-.015em;ma
 .pic.narrow{max-width:360px;justify-self:center;width:100%}
 .stack{display:grid;gap:14px}
 
+.picks{background:var(--panel);color:var(--panel-ink);border-radius:14px;padding:26px 24px 12px}
+.picks h3{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--panel-muted);margin:0 0 12px}
+.picks dl{margin:0}
+.picks dl div{display:flex;justify-content:space-between;gap:16px;align-items:baseline;padding-block:12px;border-top:1px solid #243029}
+.picks dt{font-size:15.5px}
+.picks dd{margin:0;font-weight:600;white-space:nowrap;font-size:15.5px}
+.picks dd span{font:500 13px var(--mono);color:#3ee26a;margin-left:6px}
 /* the cache clock */
 .clock{background:var(--panel);color:var(--panel-ink);border-radius:14px;padding:26px 24px 22px;font:500 13px/1.4 var(--mono)}
 .clock h3{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--panel-muted);margin:0 0 24px}
@@ -192,6 +199,7 @@ footer a{color:inherit}
   <b>Miterm</b>
   <nav aria-label="On this page">
     <a href="#cost">Cost</a>
+    <a href="#right-model">Models</a>
     <a href="#attention">Attention</a>
     <a href="#trust">Trust</a>
     <a href="#faq">FAQ</a>
@@ -251,6 +259,34 @@ footer a{color:inherit}
         </div>
       </div>
       <p class="proof"><b>Seen on a real tab:</b> a question stood unanswered for 6.5 hours on an 864k-token conversation. Seven silent renewals later, the next message read 863,720 tokens from cache and rewrote 715.</p>
+    </div>
+  </div>
+</section>
+
+<section id="right-model">
+  <div class="split">
+    <div>
+      <p class="kick">The right model</p>
+      <h2>The cheaper model isn't always cheaper.</h2>
+      <p class="intro">Half the price per token can still cost more per task, because a model that takes more turns re-reads the whole conversation on each one. The right model and effort for the job saves both time and usage.</p>
+      <ul class="points">
+        <li><b>Price per token misleads</b>At maximum effort, Sonnet cost more per task than Opus and took longer. On a general benchmark, Opus on high scored higher than Sonnet on xhigh, for less.</li>
+        <li><b>Maximum is rarely worth it</b>Sonnet on xhigh came close to the best coding results at a fraction of the cost and time of Opus at its maximum.</li>
+        <li><b>Miterm makes the call</b>New sessions start on what their folder's work has called for. Tabs switch only when it's cheap, and every switch has a Revert.</li>
+      </ul>
+    </div>
+    <div class="media">
+      <div class="picks">
+        <h3>What Miterm's guide picks</h3>
+        <dl>
+          <div><dt>Coding that runs on its own</dt><dd>Sonnet 5.5 <span>xhigh</span></dd></div>
+          <div><dt>Desktop and MCP tool work</dt><dd>Opus 5.5 <span>high</span></dd></div>
+          <div><dt>Planning and hard reasoning</dt><dd>Opus 5.5 <span>xhigh</span></dd></div>
+          <div><dt>A chat you follow along with</dt><dd>Opus 5.5 <span>medium</span></dd></div>
+          <div><dt>Small, simple jobs</dt><dd>Haiku 5.5 <span>high</span></dd></div>
+        </dl>
+      </div>
+      <p class="fine" style="margin:14px 0 0"><a href="#models">Why these picks, and what to avoid</a>. From public benchmarks and our own measurements, November 2026.</p>
     </div>
   </div>
 </section>
@@ -315,7 +351,7 @@ footer a{color:inherit}
     <div class="feat"><h3>Team members</h3><p>Start a member in its own tab under its lead. Leads can start, rename, answer and switch the model of their members.</p></div>
     <div class="feat"><h3>Subagent rows</h3><p>Background agents appear under their session. Click one to read its conversation while it works.</p></div>
     <div class="feat"><h3>Messages wake sleepers</h3><p>A message to a sleeping tab by name wakes it, and arrives once the tab is up.</p></div>
-    <div class="feat"><h3>The right model</h3><p>New sessions start on what their folder's work has called for, and tabs switch only when it's cheap. <a href="#models">Which model for what</a>.</p></div>
+    <div class="feat"><h3>Suggestions</h3><p>A fact a session found true in every project is proposed for your global CLAUDE.md. Nothing lands there without your click.</p></div>
     <div class="feat"><h3>Inspector</h3><p>Each tab's model, effort, size, cost and cache misses, and every switch Miterm made, with a Revert.</p></div>
     <div class="feat"><h3>Plan limits</h3><p>The 5-hour and weekly windows, tracked per request, so you see what a choice really costs.</p></div>
     <div class="feat"><h3>Notes before compaction</h3><p>A session writes what it learned into its project's CLAUDE.md before it's compacted or put to sleep.</p></div>
