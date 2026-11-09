@@ -3,287 +3,406 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Miterm is a native macOS terminal for Claude Code that puts idle sessions to sleep, times everything by the prompt cache and only asks for you when a session needs you.">
+<title>Miterm: run twenty Claude Code sessions, pay for the ones that work</title>
+<meta name="description" content="A native Mac terminal for Claude Code. Miterm puts idle sessions to sleep before their prompt cache expires, keeps the rest warm, and rings only when a session needs you.">
+<link rel="canonical" href="https://timtux.github.io/miterm-site/">
 <link rel="icon" href="icon.png">
-<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Miterm: a Mac terminal for Claude Code</title>
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f5f2">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0c0f0d">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Miterm: a Mac terminal for Claude Code">
-<meta property="og:description" content="Miterm is a native macOS terminal for Claude Code that puts idle sessions to sleep, times everything by the prompt cache and only asks for you when a session needs you.">
+<meta property="og:site_name" content="Miterm">
+<meta property="og:title" content="Miterm: run twenty Claude Code sessions, pay for the ones that work">
+<meta property="og:description" content="A native Mac terminal for Claude Code. Idle sessions sleep before their prompt cache expires, the rest stay warm, and one bell rings only when a session needs you.">
 <meta property="og:url" content="https://timtux.github.io/miterm-site/">
-<meta property="og:image" content="https://timtux.github.io/miterm-site/icon.png">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://timtux.github.io/miterm-site/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Miterm's window beside the headline: run twenty Claude Code sessions, pay for the ones that work.">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Miterm","applicationCategory":"DeveloperApplication","operatingSystem":"macOS 26","url":"https://timtux.github.io/miterm-site/","image":"https://timtux.github.io/miterm-site/og.jpg","description":"A native Mac terminal for Claude Code that puts idle sessions to sleep, times everything by the prompt cache and only asks for you when a session needs you.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<link rel="preload" href="fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="screenshot.webp" as="image" fetchpriority="high">
 <style>
-@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 500; font-stretch: 100%; font-display: swap; src: url(fonts/bricolage-grotesque-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 700; font-stretch: 100%; font-display: swap; src: url(fonts/bricolage-grotesque-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 500 700; font-stretch: 100%; font-display: swap; src: url(fonts/bricolage-grotesque-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/ibm-plex-mono-400-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/ibm-plex-mono-500-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-</style>
-<style>
 :root{
-  --bg:#f3f5f2; --surface:#ffffff; --ink:#15191a; --muted:#5d6763; --line:#dde3df;
-  --led:#1f9d45; --led-dim:#b9dcc3; --bell:#b86e0a; --panel:#10140f; --panel-ink:#dfe8e1; --panel-muted:#7f8c84;
+  --bg:#f3f5f2; --surface:#ffffff; --ink:#15191a; --muted:#56605c; --line:#dde3df;
+  --led:#1f9d45; --accent:#147534; --bell:#9a5a05; --panel:#10140f; --panel-ink:#dfe8e1; --panel-muted:#8e9b93;
   --display:"Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --body:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme:light dark;
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  color-scheme:dark; --bg:#0c0f0d; --surface:#141915; --ink:#e7ede8; --muted:#94a199; --line:#243029;
-  --led:#3ee26a; --led-dim:#1d4a2a; --bell:#f2b35b; --panel:#060806; --panel-ink:#dfe8e1; --panel-muted:#7f8c84; }}
-:root[data-theme="dark"]{ color-scheme:dark; --bg:#0c0f0d; --surface:#141915; --ink:#e7ede8; --muted:#94a199; --line:#243029;
-  --led:#3ee26a; --led-dim:#1d4a2a; --bell:#f2b35b; --panel:#060806; --panel-ink:#dfe8e1; --panel-muted:#7f8c84; }
+@media (prefers-color-scheme: dark){ :root{
+  --bg:#0c0f0d; --surface:#141915; --ink:#e7ede8; --muted:#9daaa2; --line:#243029;
+  --led:#3ee26a; --accent:#3ee26a; --bell:#f2b35b; --panel:#060806; }}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);padding-inline:20px}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--body);padding-inline:20px;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%;height:auto}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
 .wrap{max-width:1080px;margin:0 auto}
-header.top{display:flex;align-items:center;gap:12px;padding-block:22px}
-header.top img{width:34px;height:34px;border-radius:8px}
-header.top b{font:700 20px var(--display);letter-spacing:.01em}
-header.top span{margin-left:auto;font:500 12px var(--mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
-.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding-block:40px 72px}
-h1{font:700 clamp(38px,6vw,64px)/1.02 var(--display);letter-spacing:-.02em;margin:0 0 20px;text-wrap:balance}
-h1 em{font-style:normal;color:var(--led)}
-.lede{font-size:19px;color:var(--muted);max-width:34em;margin:0 0 26px}
-.status{display:inline-flex;gap:10px;align-items:center;font:500 13px var(--mono);border:1px solid var(--line);border-radius:999px;padding:7px 14px;color:var(--muted)}
-.status i{width:8px;height:8px;border-radius:50%;background:var(--bell)}
-/* the sidebar, as Miterm draws it */
-.win{background:var(--panel);color:var(--panel-ink);border-radius:14px;padding:16px 14px 12px;font:13px/1.35 var(--body);box-shadow:0 24px 60px -20px rgba(0,0,0,.45);max-width:100%}
-.lights{display:flex;gap:7px;margin-bottom:14px}.lights i{width:11px;height:11px;border-radius:50%;background:#3a3f3b}
-.grp{font:500 11px var(--mono);color:var(--panel-muted);letter-spacing:.06em;margin:10px 6px 6px}
-.row{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:center;padding:7px 8px;border-radius:8px}
-.row.sel{background:rgba(255,255,255,.07)}
-.row small{display:block;color:var(--panel-muted);font-size:11.5px}
-.row .meta{font:500 11px var(--mono);color:var(--panel-muted);text-align:right}
-.g{width:12px;height:12px;border-radius:50%;justify-self:center}
-.g.work{border:2px solid #3ee26a;border-right-color:transparent;animation:spin 1s linear infinite}
-.g.idle{background:#3ee26a}
-.g.bell{background:#f2b35b}
-.g.sleep{background:none;border:1.5px solid #6d7a72}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.g.work{animation:none}}
-.meter{display:flex;gap:3px;margin:14px 8px 4px;align-items:flex-end;height:22px}
-.meter i{flex:1;background:#1d4a2a;border-radius:2px}
-.meter i.on{background:#3ee26a}
-.meterlab{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--panel-muted);margin:0 8px}
-section{padding-block:56px;border-top:1px solid var(--line)}
-h2{font:700 clamp(26px,3.4vw,36px)/1.1 var(--display);letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
-.kick{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--led);margin:0 0 10px}
-.intro{color:var(--muted);max-width:40em;margin:0 0 32px;font-size:17px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-.goal h3{font:700 22px var(--display);margin:0 0 10px}
-.goal ul{margin:0;padding-left:18px;color:var(--muted)} .goal li{margin-bottom:8px} .goal li b{color:var(--ink);font-weight:600}
-.num{font:500 14px var(--mono);color:var(--ink);white-space:nowrap}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 32px}
-.feat h3{font:600 17px var(--body);margin:0 0 6px}
-.feat p{margin:0;color:var(--muted);font-size:15px}
-.cmp{width:100%;border-collapse:collapse;font-size:15px}
+code{font-family:var(--mono);font-size:.86em}
+
+header.top{display:flex;align-items:center;gap:12px;padding-block:20px}
+header.top img{border-radius:8px}
+header.top b{font:700 20px var(--display)}
+header.top nav{margin-left:auto;display:flex;align-items:center;gap:22px;font-size:15px}
+header.top nav a{color:var(--muted);text-decoration:none}
+header.top nav a:hover{color:var(--ink)}
+header.top nav a.small{color:var(--bg);background:var(--ink);font-weight:600;padding:6px 14px;border-radius:8px}
+header.top nav a.small:hover{color:var(--bg);opacity:.85}
+
+.hero{text-align:center;padding-block:44px 0}
+.kick{font:500 12.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 12px}
+h1{font:700 clamp(40px,7vw,76px)/1.02 var(--display);letter-spacing:-.022em;margin:0 auto 22px;max-width:15em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--led);display:block}
+.lede{font-size:clamp(18px,2vw,21px);color:var(--muted);max-width:33em;margin:0 auto 28px;text-wrap:pretty}
+.actions{display:flex;gap:18px;justify-content:center;align-items:center;flex-wrap:wrap}
+.dl{display:inline-block;font:600 17px var(--body);background:var(--ink);color:var(--bg);text-decoration:none;border-radius:11px;padding:14px 26px}
+.dl:hover{opacity:.85}
+.more{color:var(--ink);text-decoration:none;font-weight:500}
+.more:hover{text-decoration:underline}
+.needs{margin:16px 0 0;font:500 13px var(--mono);color:var(--muted)}
+.shot{width:100%;margin-top:44px;border-radius:14px;box-shadow:0 30px 70px -24px rgba(0,0,0,.55)}
+.legend{display:grid;grid-template-columns:22fr 60fr 18fr;gap:18px;margin:16px 0 0;padding:0;list-style:none;text-align:left;font-size:14.5px;color:var(--muted)}
+.legend b{display:block;color:var(--ink);font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;padding-block:60px;margin:0}
+.stats div{margin:0}
+.stats dt{font:700 clamp(46px,6vw,64px)/1 var(--display);letter-spacing:-.02em;color:var(--led);margin-bottom:10px}
+.stats dd{margin:0;color:var(--muted);font-size:16px;max-width:19em}
+
+section{padding-block:68px;border-top:1px solid var(--line)}
+h2{font:700 clamp(30px,4.2vw,44px)/1.08 var(--display);letter-spacing:-.015em;margin:0 0 14px;text-wrap:balance}
+.intro{color:var(--muted);max-width:36em;margin:0 0 28px;font-size:19px;text-wrap:pretty}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.split.top{align-items:start}
+.points{margin:0;padding:0;list-style:none}
+.points li{padding-block:14px;border-top:1px solid var(--line);color:var(--muted)}
+.points li:last-child{padding-bottom:0}
+.points b{display:block;color:var(--ink);font-weight:600}
+.pic{border-radius:12px;box-shadow:0 20px 50px -24px rgba(0,0,0,.5)}
+.pic.narrow{max-width:360px;justify-self:center;width:100%}
+.stack{display:grid;gap:14px}
+
+/* the cache clock */
+.clock{background:var(--panel);color:var(--panel-ink);border-radius:14px;padding:26px 24px 22px;font:500 13px/1.4 var(--mono)}
+.clock h3{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--panel-muted);margin:0 0 24px}
+.lane{margin-bottom:26px}
+.lane:last-of-type{margin-bottom:0}
+.lane p{margin:0 0 9px;color:var(--panel-ink)}
+.track{position:relative;height:10px;border-radius:5px;background:#1f2a23}
+.fill{position:absolute;inset:0 auto 0 0;border-radius:5px;background:#3ee26a}
+.fill.long{width:100%;background:linear-gradient(90deg,#3ee26a 88%,#f2b35b)}
+.fill.short{width:88%}
+.tick{position:absolute;top:-4px;width:18px;height:18px;border-radius:50%;background:var(--panel);border:3px solid #f2b35b;right:-1px}
+.tick.sleep{right:calc(12% - 9px);border-color:#3ee26a}
+.lab{display:flex;justify-content:space-between;gap:12px;margin-top:9px;color:var(--panel-muted)}
+.lab .bad{color:#f2b35b;text-align:right}
+.lab .ok{color:#3ee26a;text-align:right}
+.proof{margin:24px 0 0;padding:16px 18px;border-left:3px solid var(--led);background:var(--surface);border-radius:0 10px 10px 0;font-size:15.5px;color:var(--muted)}
+.proof b{color:var(--ink);font-weight:600}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 36px}
+.feat h3{font:600 17px var(--body);margin:0 0 4px}
+.feat p{margin:0;color:var(--muted);font-size:15.5px}
+
 .cmpwrap{overflow-x:auto}
-.cmp th,.cmp td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-.cmp th{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.cmp td:first-child{font-weight:600;white-space:nowrap}
-.cmp td.us{color:var(--ink)} .cmp td.them{color:var(--muted)}
-.dream{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
-.dream ul{margin:0;padding-left:18px;color:var(--muted)} .dream li{margin-bottom:10px} .dream li b{color:var(--ink);font-weight:600}
-.log{background:var(--panel);color:var(--panel-ink);border-radius:12px;padding:16px 18px;font:13px/1.55 var(--mono);max-width:100%;overflow-x:auto}
-.log .t{color:var(--panel-muted)} .log .ok{color:#3ee26a} .log .rv{color:#f2b35b}
-.soon{display:inline-block;font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--bell);border:1px solid var(--bell);border-radius:999px;padding:2px 9px;margin-left:10px;vertical-align:middle}
-@media (max-width:820px){.dream{grid-template-columns:1fr}}
-code{font-family:var(--mono);font-size:.88em}
-.cmp td.pick{white-space:nowrap;font-weight:600}
-.cmp td.pick span{display:block;font:500 13px var(--mono);color:var(--led)}
-.rules{margin:0;padding-left:20px;color:var(--muted)} .rules li{margin-bottom:10px} .rules li b{color:var(--ink);font-weight:600}
-.fine{color:var(--muted);font-size:14px;margin:18px 0 0}
-.models td:first-child{white-space:normal}
-@media (max-width:520px){.models tr:first-child{display:none}.models tr{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--line)}.models td{border:0;padding:0}.models td.pick{text-align:right}.models td.them{grid-column:1/-1}}
-footer{padding-block:40px 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
-@media (max-width:820px){.hero,.two{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}
-@media (max-width:520px){.grid{grid-template-columns:1fr}.lede{font-size:17px}header.top span{display:none}}
-.withart{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;align-items:center;margin-bottom:32px}.art{display:block;width:100%;height:auto;border-radius:12px}.art.side{max-width:300px;justify-self:center}.arts{display:grid;gap:12px}
-@media (max-width:820px){.withart{grid-template-columns:1fr;gap:20px}}
-.shot{display:block;width:100%;height:auto;margin-top:28px;border-radius:12px;box-shadow:0 24px 60px -20px rgba(0,0,0,.45)}
+.cmp{width:100%;border-collapse:collapse;font-size:16px}
+.cmp th,.cmp td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp thead th{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cmp tbody th{font-weight:600;white-space:nowrap}
+.cmp td{color:var(--muted)}
+.cmp td.us{color:var(--ink);font-weight:500}
+.cmp thead th.us{color:var(--accent)}
+.cmp td.pick{white-space:nowrap;font-weight:600;color:var(--ink)}
+.cmp td.pick span{display:block;font:500 13px var(--mono);color:var(--accent)}
+.models{font-size:15px}
+.models tbody td:first-child{color:var(--ink);font-weight:600}
+
+details{border-top:1px solid var(--line)}
+details:last-of-type{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;padding-block:17px;font-weight:600;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:500 20px/1.2 var(--mono);color:var(--muted)}
+details[open] summary::after{content:"\2212"}
+.answer{padding-bottom:22px;color:var(--muted);max-width:44em}
+.answer.wide{max-width:none}
+.answer p{margin:0 0 12px}
+.answer p:last-child{margin-bottom:0}
+.answer h3{font:600 17px var(--body);color:var(--ink);margin:28px 0 10px}
+.answer ul,.answer ol{margin:0;padding-left:20px}
+.answer li{margin-bottom:8px}
+.answer b{color:var(--ink);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px 36px}
+.fine{color:var(--muted);font-size:14px}
+
+.final{margin-top:0;border:0;padding-block:0 68px}
+.band{background:var(--panel);color:#f2f6f3;border-radius:18px;text-align:center;padding:64px 24px}
+.band h2{color:#f2f6f3;margin-bottom:12px}
+.band p{color:#aab6ae;margin:0 0 26px;font-size:18px}
+.band .dl{background:#3ee26a;color:#06140a}
+.band .needs{color:#8e9b93}
+
+footer{padding-block:0 48px;color:var(--muted);font-size:14px;display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
 footer a{color:inherit}
-.dl{display:inline-block;font:600 16px var(--body);background:var(--ink);color:var(--bg);text-decoration:none;border-radius:10px;padding:12px 20px}.dl:hover{opacity:.85}
-.needs{display:block;margin-top:12px;font:500 13px var(--mono);color:var(--muted)}
+
+@media (max-width:820px){
+  .split,.two{grid-template-columns:1fr;gap:30px}
+  .split .media{order:2}
+  .grid{grid-template-columns:1fr 1fr}
+  .legend{grid-template-columns:1fr;gap:8px}
+  .stats{grid-template-columns:1fr;gap:28px;padding-block:44px}
+  section{padding-block:52px}
+  .band{padding:48px 20px}
+}
+@media (max-width:520px){
+  .grid{grid-template-columns:1fr}
+  header.top nav a:not(.small){display:none}
+  .models thead{display:none}
+  .models tr{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .models td{border:0;padding:0}
+  .models td.pick{text-align:right}
+  .models td:last-child{grid-column:1/-1}
+  .cmp tbody th{white-space:normal}
+  .cmp:not(.models){font-size:14px;line-height:1.35}
+  .cmp:not(.models) th,.cmp:not(.models) td{padding:10px 6px}
+  .cmp thead th{font-size:10.5px;letter-spacing:.02em}
+}
 </style>
 </head>
 <body>
-
-
 <div class="wrap">
-<header class="top"><img alt="" src="data:image/png;base64,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"><b>Miterm</b><span>A Mac terminal for Claude Code</span></header>
 
+<header class="top">
+  <img src="icon.png" width="34" height="34" alt="">
+  <b>Miterm</b>
+  <nav aria-label="On this page">
+    <a href="#cost">Cost</a>
+    <a href="#attention">Attention</a>
+    <a href="#trust">Trust</a>
+    <a href="#faq">FAQ</a>
+    <a class="small" href="https://github.com/timtux/miterm-site/releases/download/v0.4/Miterm-0.4-16300b45.zip">Download</a>
+  </nav>
+</header>
+
+<main>
 <div class="hero">
-  <div>
-    <h1>Run twenty Claude Code sessions. <em>Pay for the ones that work.</em></h1>
-    <p class="lede">Miterm is a native macOS terminal built around Claude Code. It puts idle sessions to sleep, times everything by the prompt cache, and only asks for you when a session actually needs you.</p>
+  <p class="kick">A native Mac terminal for Claude Code</p>
+  <h1>Run twenty Claude Code sessions. <em>Pay for the ones that work.</em></h1>
+  <p class="lede">Miterm puts idle sessions to sleep before their cache expires, keeps the rest warm, and rings only when one actually needs you.</p>
+  <div class="actions">
     <a class="dl" href="https://github.com/timtux/miterm-site/releases/download/v0.4/Miterm-0.4-16300b45.zip">Download Miterm 0.4</a>
-    <span class="needs">macOS 26 · Apple silicon · Claude Code</span>
+    <a class="more" href="#cost">See how it saves &darr;</a>
   </div>
-  <div class="win" aria-label="Miterm's sidebar with sessions in different states">
-    <div class="lights"><i></i><i></i><i></i></div>
-    <div class="grp">~/Development</div>
-    <div class="row sel"><span class="g work"></span><div>Payments API<small>working · Sonnet</small></div><span class="meta">cache 52 min</span></div>
-    <div class="row"><span class="g bell"></span><div>Checkout redesign<small>wants you to pick a layout</small></div><span class="meta">now</span></div>
-    <div class="row"><span class="g idle"></span><div>Release notes<small>done · waiting</small></div><span class="meta">cache 9 min</span></div>
-    <div class="row"><span class="g sleep"></span><div>Search index<small>asleep · 0 MB</small></div><span class="meta">1 h 40</span></div>
-    <div class="row"><span class="g sleep"></span><div>Docs site<small>asleep · 0 MB</small></div><span class="meta">3 h</span></div>
-    <div class="meter" aria-hidden="true"><i class="on" style="height:30%"></i><i class="on" style="height:45%"></i><i class="on" style="height:60%"></i><i class="on" style="height:50%"></i><i style="height:70%"></i><i style="height:85%"></i><i style="height:100%"></i><i style="height:90%"></i></div>
-    <div class="meterlab"><span>5-hour limit 41 %</span><span>week 11 %</span></div>
-  </div>
+  <p class="needs">Free · Notarized by Apple · macOS 26 on Apple silicon · Runs on your Claude Code login</p>
+  <img class="shot" src="screenshot.webp" width="2000" height="1305" fetchpriority="high" alt="Miterm's window: a sidebar with a session that needs you, two scheduled jobs and sleeping tabs; a Claude Code conversation in the middle; the tab's context, cache clock, cost and weekly plan on the right.">
+  <ul class="legend">
+    <li><b>Sidebar</b>Who needs you, what's scheduled, who's asleep.</li>
+    <li><b>Terminal</b>A real one. All of Claude Code keeps working, unchanged.</li>
+    <li><b>Inspector</b>Context, cache clock, cost, your week.</li>
+  </ul>
 </div>
 
-<section>
-  <p class="kick">Why it exists</p>
-  <h2>Two promises, and every feature has to serve one of them.</h2>
-  <p class="intro">Most tools for AI coding add more ways to start agents. Miterm is about what happens after: keeping many long-running sessions cheap, and keeping you out of the babysitting.</p>
-  <div class="two">
-    <div class="goal"><h3>Lower the cost</h3><ul>
-      <li><b>Sleep before the cache expires.</b> A cached conversation is read at <span class="num">0.1×</span>; once it expires the next message rewrites all of it at <span class="num">2×</span>. Miterm compacts a large idle tab and puts it to sleep minutes before that happens.</li>
-      <li><b>Keep awake tabs warm, silently.</b> A tab that won't sleep, because it is pinned, selected or waiting on your answer, has its cache renewed just before it runs out, through Claude Code's own plugin API: no turn, no line in your conversation. And only as often as the tab is likely to be used again.</li>
-      <li><b>Leave unused MCP servers off.</b> Servers a folder has not called all week don't start in its sessions, so their tool lists stay out of every request. A session that needs one turns it back on itself, carries on where it was, and can leave it off again when the task is done.</li>
-      <li><b>Compact before it runs away.</b> A conversation can grow through a single long turn, and every request re-reads all of it. Miterm's sessions compact themselves well before that gets expensive, unless you set a window of your own.</li>
-      <li><b>The right model for the job.</b> New sessions start on the model and effort their folder's work has called for, and Miterm switches a tab only when the switch is cheap. <a href="#models">Which model for what</a>.</li>
-      <li><b>Know your plan limits.</b> The 5-hour and weekly windows are tracked per request, so you see what a model or a cache setting really costs you.</li>
-      <li><b>Miterm spends too, and says so.</b> Its assistant and the notes sessions write run on your own Claude login and count against your plan. Dreams and parked tasks use only budget that would otherwise go unused.</li>
-    </ul></div>
-    <div class="goal"><h3>Lower the load on you</h3><ul>
-      <li><b>One bell, when it matters.</b> An assistant on your own Claude login reads what each session finished and rings only when a session needs a decision from you.</li>
-      <li><b>Nothing to track by hand.</b> Sessions wake with their conversation intact, loops and goals keep running, Remote Control reconnects on its own.</li>
-      <li><b>Never types over your draft.</b> Miterm reaches Claude Code through its plugin API where it can and never types while you have a draft, so a half-written message stays exactly as you left it.</li>
-      <li><b>Decides instead of asking.</b> Miterm acts and keeps it undoable, with a log line and a revert, rather than adding another setting or prompt.</li>
-    </ul></div>
-  </div>
-</section>
+<dl class="stats">
+  <div><dt>20&times;</dt><dd>What the next message costs once a prompt cache has expired, against one read from cache. Miterm acts first.</dd></div>
+  <div><dt>0&nbsp;MB</dt><dd>Held by a sleeping session's Claude Code, down from hundreds. The conversation is intact when it wakes.</dd></div>
+  <div><dt>0.7&nbsp;s</dt><dd>To update Miterm itself, measured with a tab running. Your sessions never notice.</dd></div>
+</dl>
 
-<section>
-  <p class="kick">What it does</p>
-  <h2>Built for sessions that run for days.</h2>
-  <img class="shot" src="screenshot.webp" width="2000" height="1305" loading="lazy" alt="Miterm's window: a sidebar with a session that needs you, two scheduled jobs and sleeping tabs; a Claude Code conversation in the middle; the tab's context, cache clock, cost and weekly plan on the right.">
-  <div class="grid" style="margin-top:28px">
-    <div class="feat"><h3>Hibernation</h3><p>Idle Claude Code sessions are ended safely and resumed on demand, freeing their memory. A tab can wake in the project its work moved to, and Move Back undoes it. Nothing that is still working is ever touched.</p></div>
-    <div class="feat"><h3>Cache clock</h3><p>Every tab shows when its prompt cache expires, read from Claude Code's own status line.</p></div>
-    <div class="feat"><h3>Subagent rows</h3><p>Background agents appear under their session with model, tokens and time. Click one to read its conversation while it works.</p></div>
-    <div class="feat"><h3>Team members</h3><p>Right-click a conversation to start a member in its own tab, nested under its lead. Leads can start, rename and answer their members and switch their model, and members report back by message.</p></div>
-    <div class="feat"><h3>Messages wake sleepers</h3><p>A session that sends a message to a sleeping tab by name wakes it, and the message arrives once the tab is up.</p></div>
-    <div class="feat"><h3>Sleepers out of the way</h3><p>Sleeping tabs sit last in their folder, most recent first, with the rest behind "Show more".</p></div>
-    <div class="feat"><h3>Notes before compaction</h3><p>A session writes down what it learned into its project's CLAUDE.md before it is compacted or put to sleep.</p></div>
-    <div class="feat"><h3>Action log</h3><p>Everything Miterm did on its own, with who asked and why, in one place.</p></div>
-    <div class="feat"><h3>Inspector</h3><p>Each tab's model and effort, size, cost and cache misses, and every switch Miterm made, with a Revert.</p></div>
-    <div class="feat"><h3>Backlog</h3><p><code>/miterm:backlog</code> keeps open work out of CLAUDE.md, per project, in one folded view. Start opens a tab on an item, Done closes it, and nothing is ever deleted.</p></div>
-    <div class="feat"><h3>Suggestions</h3><p>A fact a session found true in every project is proposed for your global CLAUDE.md. Nothing lands there without your click.</p></div>
-    <div class="feat"><h3>Skip permissions, if you want to</h3><p>An option in Settings, off by default, runs your own sessions without permission prompts. It rides on each launch and never touches your Claude Code settings.</p></div>
-  </div>
-</section>
-
-<section id="models">
-  <p class="kick">Model and effort</p>
-  <h2>Which model for which job.</h2>
-  <p class="intro">A new session starts on the chat pick below, or on what its folder's last sessions settled on, unless you name a model yourself. After a compaction, Miterm checks whether the tab's work still fits its model, and switches it at a moment when that is cheap. Nothing is saved to your Claude Code settings, and every switch can be reverted from the inspector.</p>
-  <div class="cmpwrap"><table class="cmp models">
-    <tr><th>Work</th><th>Model and effort</th><th>Why</th></tr>
-    <tr><td>Coding that runs on its own (agents building to a plan)</td><td class="pick">Sonnet 5.5<span>xhigh</span></td><td class="them">Close to the best coding results, at a fraction of the cost and time of Opus at its maximum</td></tr>
-    <tr><td>Desktop and MCP tool work (CAD, 3D, design apps)</td><td class="pick">Opus 5.5<span>high</span></td><td class="them">Near the best result for well under half the cost of max; Sonnet costs more here, not less</td></tr>
-    <tr><td>Planning, architecture, hard reasoning, code review</td><td class="pick">Opus 5.5<span>xhigh</span></td><td class="them">The strongest reasoning short of max, for a little over half its cost</td></tr>
-    <tr><td>A chat you follow along with</td><td class="pick">Opus 5.5<span>medium</span></td><td class="them">Anthropic's default. You are the double-check; go to high if corrections pile up</td></tr>
-    <tr><td>Small, simple jobs (expanding a search, sorting)</td><td class="pick">Haiku 5.5<span>high</span></td><td class="them">Far cheaper per task than Opus 5.5 on low, for a somewhat lower general score</td></tr>
-  </table></div>
-  <div class="two" style="margin-top:36px">
-    <div class="goal"><h3>Rules of thumb</h3><ol class="rules">
-      <li><b>Cost per task, not per token.</b> A cheaper model that writes more and takes more turns can cost more per finished task.</li>
-      <li><b>Cache reads are most of the bill.</b> Cost follows turns times context size, so effort moves it more than the model's price does.</li>
-      <li><b>Switch models only at a free moment:</b> a new session, a wake, right after a compaction. Each model has its own cache. Effort can change any time and keeps the cache.</li>
-      <li><b>Raise effort</b> when Claude skips a file, doesn't run the tests or doesn't double-check its work.</li>
-    </ol></div>
-    <div class="goal"><h3>Avoid</h3><ul>
-      <li><b>Medium or low effort</b> for work nobody watches.</li>
-      <li><b>Max effort</b>, unless the last few points are worth twice the cost.</li>
-      <li><b>Older models</b> (Opus 5 and 4.8, Sonnet 5 and 4.x): some level of Opus 5.5 is both better and cheaper.</li>
-      <li><b>Fable 5.1</b>: it cost more for the same work in every comparison we read.</li>
-      <li><b><code>/model &lt;name&gt;</code> and <code>/effort &lt;level&gt;</code></b>: both save as your default. For this session only, type <code>/model</code> or <code>/effort</code> alone, pick with ←/→ and press <code>s</code>.</li>
-    </ul></div>
-  </div>
-  <p class="fine">From public benchmarks and our own measurements, November 2026. Models change, and so will this table.</p>
-</section>
-
-<section>
-  <p class="kick">Tidies itself</p>
-  <h2>Dreaming</h2>
-  <p class="intro">Every session writes down what it learned before it is compacted or put to sleep. Over weeks those notes pile up: the same rule in three wordings, old facts that were later proven wrong, long stories where one line would do. And every one of those lines is sent with every request, in every session.</p>
-  <div class="dream">
-    <ul>
-      <li><b>Tightens what has grown.</b> Miterm goes through a CLAUDE.md that has grown, entry by entry: rules that say the same thing merged, long stories condensed to the rule they taught, old status and evidence moved to <code>CLAUDE.history.md</code>, open work to the project's backlog.</li>
-      <li><b>Runs on budget you would lose anyway.</b> It dreams only when the week is heading for budget it won't use: on the last day before the reset, or earlier when a quarter would go to waste. At most three files a week.</li>
-      <li><b>Applies itself, and keeps every version.</b> No approval step. Miterm keeps its own history of every CLAUDE.md it knows, and Settings shows each dream's changes with a Revert.</li>
-      <li><b>Careful by construction.</b> A rewrite keeps every number and name, a rule never leaves the file, whatever moves out goes word for word to the history file, and a file you edited meanwhile is left alone.</li>
-    </ul>
-    <div class="log" aria-label="Example action log after a dream">
-      <div><span class="t">04:52</span> dream · Checkout redesign</div>
-      <div class="ok">CLAUDE.md  48 KB → 39 KB</div>
-      <div>  rules merged, stories condensed</div>
-      <div class="rv">  ↺ revert to previous version</div>
-      <br>
-      <div><span class="t">04:53</span> dream · Payments API</div>
-      <div class="ok">CLAUDE.md  21 KB → 17 KB</div>
-      <div>  old status moved to history</div>
-      <div class="rv">  ↺ revert to previous version</div>
+<section id="cost">
+  <div class="split top">
+    <div>
+      <p class="kick">Lower the cost</p>
+      <h2>An idle session costs you twice.</h2>
+      <p class="intro">It holds memory while doing nothing. Then its prompt cache runs out, and your next message rewrites the whole conversation. Miterm watches the clock so you don't have to.</p>
+      <ul class="points">
+        <li><b>Sleeps before the cache expires</b>A large idle tab is compacted and put to sleep minutes before the deadline. Anything still working is never touched.</li>
+        <li><b>Keeps the tabs you need warm</b>A pinned tab, or one waiting on your answer, has its cache renewed through Claude Code's own plugin API: no turn, no line in your conversation.</li>
+        <li><b>Compacts before a turn runs away</b>Every request re-reads the whole conversation, so sessions compact well before that gets expensive, unless you set your own window.</li>
+        <li><b>Leaves unused MCP servers off</b>Servers a folder hasn't called all week stay out of every request. A session that needs one turns it back on and carries on.</li>
+      </ul>
+    </div>
+    <div class="media">
+      <div class="clock" role="img" aria-label="Two timelines. In a plain terminal the cache expires and the next message costs twenty times more. In Miterm the tab is compacted and put to sleep just before that.">
+        <h3>After a session's last reply</h3>
+        <div class="lane">
+          <p>A plain terminal</p>
+          <div class="track"><div class="fill long"></div><i class="tick"></i></div>
+          <div class="lab"><span>idle, memory held</span><span class="bad">cache gone: next message 20&times;</span></div>
+        </div>
+        <div class="lane">
+          <p>Miterm</p>
+          <div class="track"><div class="fill short"></div><i class="tick sleep"></i></div>
+          <div class="lab"><span>idle, clock watched</span><span class="ok">compacted, asleep, memory free</span></div>
+        </div>
+      </div>
+      <p class="proof"><b>Seen on a real tab:</b> a question stood unanswered for 6.5 hours on an 864k-token conversation. Seven silent renewals later, the next message read 863,720 tokens from cache and rewrote 715.</p>
     </div>
   </div>
 </section>
 
-<section>
-  <div class="withart"><div>
-  <p class="kick">Memory</p>
-  <h2>Every session you ever had, one keystroke away.</h2>
-  <p class="intro">Every conversation you have had with Claude Code stays on your Mac as a transcript nobody reads again. Miterm makes them findable, by you and by your sessions.</p>
-  </div><div class="arts"><img class="art" src="art/memory-search.webp" width="1114" height="190" loading="lazy" alt="The ⌘P palette: searching for refunded twice finds a session titled Duplicate refunds"><img class="art" src="art/memory.webp" width="1114" height="637" loading="lazy" alt="The ⌘P palette with an empty field: recently closed conversations first, then the open tabs"></div></div>
-  <div class="grid">
-    <div class="feat"><h3>All of it in ⌘P</h3><p>Open tabs and every conversation on disk, by title, folder and what was said. Recently closed comes first, so ⌘P and Return reopens the tab you just closed.</p></div>
-    <div class="feat"><h3>Search by meaning</h3><p>Type what you remember, not the exact words. When the words find little, a small Claude model on your own login widens the search to the words such a session would have used.</p></div>
-    <div class="feat"><h3>Sessions can look back</h3><p>Ask a session what an earlier one decided, and <code>/miterm:recall</code> lets it search its own project's past conversations and memory notes.</p></div>
+<section id="attention">
+  <div class="split">
+    <div class="media"><img class="pic narrow" src="art/cron.webp" width="602" height="752" loading="lazy" alt="Miterm's sidebar: a session under Needs you with a bell, a Cron section with a nightly job and a command check, and sleeping tabs below."></div>
+    <div>
+      <p class="kick">Lower the load on you</p>
+      <h2>One bell, only when it's your move.</h2>
+      <p class="intro">Twenty sessions shouldn't mean twenty tabs to check. An assistant reads what each one finished and rings only when a session is stuck without a decision from you.</p>
+      <ul class="points">
+        <li><b>Nothing to keep track of</b>Sessions wake with their conversation intact, loops keep running, and Remote Control reconnects on its own.</li>
+        <li><b>Never types over your draft</b>A half-written message stays exactly as you left it.</li>
+        <li><b>Decides, and lets you undo</b>Miterm acts rather than asking, with a line in the action log and a Revert, instead of one more setting or prompt.</li>
+      </ul>
+    </div>
   </div>
 </section>
 
-<section>
-  <div class="withart"><div>
-  <p class="kick">Built-in cron</p>
-  <h2>Schedules that survive restarts.</h2>
-  <p class="intro">Claude Code's own cron runs inside its process, so a session that ends takes its schedule with it. In Miterm, the same <code>/loop</code> and cron tools hand their jobs to the app, which keeps them on disk and fires them itself.</p>
-  </div><img class="art side" src="art/cron.webp" width="602" height="752" loading="lazy" alt="Miterm's sidebar: a Cron section listing a nightly job and a command check, above tabs that are asleep"></div>
-  <div class="grid">
-    <div class="feat"><h3>Survives restarts</h3><p>Jobs live through sleep, restarts of the session and restarts of Miterm. Nothing has to be set up again, and you ask Claude Code for a schedule the way you already do.</p></div>
-    <div class="feat"><h3>A loop no longer keeps a tab awake</h3><p>A tab whose next run is more than an hour off can sleep, and Miterm wakes it when the job is due. Its memory is free in between.</p></div>
-    <div class="feat"><h3>A check that costs nothing</h3><p><code>/miterm:schedule</code> runs a shell command and wakes the session only when it passes (CI green, a file there, a host up), instead of re-reading the conversation at every tick.</p></div>
-  </div>
-  <p class="fine">Loops and cron jobs stand first in the sidebar, each with its next run and Run Now, Stop and Renew. A recurring job runs for a week unless you renew it, so a forgotten loop doesn't run for ever.</p>
-</section>
-
-<section>
-  <div class="withart"><div>
-  <p class="kick">Spare budget</p>
-  <h2>Later, when the budget is free</h2>
-  <p class="intro">Batch APIs give a discount for work that can wait. A Claude plan has its own version: budget left over when the week resets is simply gone. Type <code>/miterm:later</code> after a task that isn't urgent, and Miterm runs it when that budget would otherwise be lost.</p>
-  </div><img class="art side" src="art/later.webp" width="517" height="728" loading="lazy" alt="Miterm's inspector: a parked task waiting for spare plan budget, with Run Now and Forget buttons"></div>
-  <div class="grid">
-    <div class="feat"><h3>Park it in one line</h3><p>The session writes the task down as one self-contained paragraph and ends its turn. Nothing keeps the tab awake while it waits.</p></div>
-    <div class="feat"><h3>Runs on spare budget</h3><p>Miterm starts it only when the week is heading for budget it will never use, then at a fresh five-hour window or one about to end with room to spare. Every check is in the log with its projection.</p></div>
-    <div class="feat"><h3>Held by Miterm, not the session</h3><p>The wish survives quitting, restarts and sleep. A sleeping tab is woken, and the task is typed in once it's idle. Run now or forget it from the inspector.</p></div>
+<section id="memory">
+  <div class="split">
+    <div>
+      <p class="kick">Memory</p>
+      <h2>Find any past session in one keystroke.</h2>
+      <p class="intro">⌘P searches open tabs and every conversation on your Mac, by title, folder and what was said.</p>
+      <ul class="points">
+        <li><b>Search by meaning</b>Type what you remember. When the words find little, a small Claude model widens the search to the words such a session would have used.</li>
+        <li><b>⌘P, Return reopens what you just closed</b>Recently closed comes first.</li>
+        <li><b>Sessions can look back too</b><code>/miterm:recall</code> lets a session search its project's earlier conversations and notes.</li>
+        <li><b>Sleeping tabs don't expire</b>Claude Code deletes old transcripts, by default after 30 days. Miterm warns you, and keeps a sleeping tab's as long as the tab stays in the sidebar.</li>
+      </ul>
+    </div>
+    <div class="media stack">
+      <img class="pic" src="art/memory-search.webp" width="1114" height="190" loading="lazy" alt="The ⌘P palette: searching for refunded twice finds a session titled Duplicate refunds">
+      <img class="pic" src="art/memory.webp" width="1114" height="637" loading="lazy" alt="The ⌘P palette with an empty field: recently closed conversations first, then the open tabs">
+    </div>
   </div>
 </section>
 
-<section>
+<section id="away">
+  <div class="split">
+    <div>
+      <p class="kick">While you're away</p>
+      <h2>Work that doesn't need an open tab.</h2>
+      <p class="intro">Schedules, parked tasks and tidying all run from Miterm itself, so they outlive any one session.</p>
+      <ul class="points">
+        <li><b>Schedules that survive restarts</b>The same <code>/loop</code> and cron tools hand their jobs to the app, so they live through sleep and restarts. A tab can sleep between runs.</li>
+        <li><b>Checks that cost nothing</b><code>/miterm:schedule</code> runs a shell command and wakes the session only when it passes: CI green, a file there, a host up.</li>
+        <li><b>Later, on spare budget</b>Budget left when the week resets is simply gone. <code>/miterm:later</code> parks a task and runs it on that budget.</li>
+        <li><b>CLAUDE.md files that tidy themselves</b>On that same spare budget, a grown file is merged and condensed. Every number and name stays, what moves out goes word for word to a history file, and every dream has a Revert.</li>
+      </ul>
+    </div>
+    <div class="media"><img class="pic narrow" src="art/later.webp" width="517" height="728" loading="lazy" alt="Miterm's inspector: a parked task waiting for spare plan budget, with Run Now and Forget buttons"></div>
+  </div>
+</section>
+
+<section id="features">
+  <p class="kick">Also in the box</p>
+  <h2>Built for sessions that run for days.</h2>
+  <div class="grid" style="margin-top:28px">
+    <div class="feat"><h3>Team members</h3><p>Start a member in its own tab under its lead. Leads can start, rename, answer and switch the model of their members.</p></div>
+    <div class="feat"><h3>Subagent rows</h3><p>Background agents appear under their session. Click one to read its conversation while it works.</p></div>
+    <div class="feat"><h3>Messages wake sleepers</h3><p>A message to a sleeping tab by name wakes it, and arrives once the tab is up.</p></div>
+    <div class="feat"><h3>The right model</h3><p>New sessions start on what their folder's work has called for, and tabs switch only when it's cheap. <a href="#models">Which model for what</a>.</p></div>
+    <div class="feat"><h3>Inspector</h3><p>Each tab's model, effort, size, cost and cache misses, and every switch Miterm made, with a Revert.</p></div>
+    <div class="feat"><h3>Plan limits</h3><p>The 5-hour and weekly windows, tracked per request, so you see what a choice really costs.</p></div>
+    <div class="feat"><h3>Notes before compaction</h3><p>A session writes what it learned into its project's CLAUDE.md before it's compacted or put to sleep.</p></div>
+    <div class="feat"><h3>Backlog</h3><p><code>/miterm:backlog</code> keeps open work out of CLAUDE.md. Start opens a tab on an item.</p></div>
+    <div class="feat"><h3>Skip permissions, if you want</h3><p>Off by default. It rides on each launch and never touches your Claude Code settings.</p></div>
+  </div>
+</section>
+
+<section id="native">
   <p class="kick">Native, not a web page</p>
-  <h2>Written in Swift for the Mac.</h2>
-  <p class="intro">Claude Code on the Mac usually runs in a plain terminal or a web-based app. Miterm is a real terminal underneath, so all of Claude Code keeps working, with the Mac's own notifications, windows and full screen on top.</p>
-  <div class="cmpwrap"><table class="cmp">
-    <tr><th></th><th>Miterm</th><th>A plain terminal</th><th>A web-based app</th></tr>
-    <tr><td>Built with</td><td class="us">Swift and AppKit</td><td class="them">native, but knows nothing about Claude</td><td class="them">JavaScript in a browser shell</td></tr>
-    <tr><td>Idle sessions</td><td class="us">sleep and wake where they were</td><td class="them">stay in memory</td><td class="them">stay in memory</td></tr>
-    <tr><td>Prompt cache</td><td class="us">timed, kept warm or compacted</td><td class="them">left to expire</td><td class="them">left to expire</td></tr>
-    <tr><td>Needs you</td><td class="us">one bell with the reason</td><td class="them">you check each tab</td><td class="them">you check each chat</td></tr>
+  <h2>Written in Swift, for the Mac.</h2>
+  <div class="cmpwrap" style="margin-top:24px"><table class="cmp">
+    <thead><tr><td></td><th scope="col" class="us">Miterm</th><th scope="col">A plain terminal</th><th scope="col">A web-based app</th></tr></thead>
+    <tbody>
+    <tr><th scope="row">Built with</th><td class="us">Swift and AppKit</td><td>native, but knows nothing about Claude</td><td>JavaScript in a browser shell</td></tr>
+    <tr><th scope="row">Idle sessions</th><td class="us">sleep and wake where they were</td><td>stay in memory</td><td>stay in memory</td></tr>
+    <tr><th scope="row">Prompt cache</th><td class="us">timed, kept warm or compacted</td><td>left to expire</td><td>left to expire</td></tr>
+    <tr><th scope="row">Needs you</th><td class="us">one bell with the reason</td><td>you check each tab</td><td>you check each chat</td></tr>
+    </tbody>
   </table></div>
 </section>
 
+<section id="trust">
+  <p class="kick">Trust</p>
+  <h2>It ends sessions for you, so it refuses when in doubt.</h2>
+  <p class="intro">Wrongly ending a session destroys work. Wrongly leaving one awake only wastes memory. Every judgement in Miterm leans towards leaving it alone.</p>
+  <div class="grid">
+    <div class="feat"><h3>Your settings stay yours</h3><p>What Miterm needs rides on each launch. It asks before any change to your Claude Code config.</p></div>
+    <div class="feat"><h3>No account, no telemetry</h3><p>The only network call Miterm itself makes is the update check on GitHub. Your conversations go where Claude Code already sends them.</p></div>
+    <div class="feat"><h3>It spends too, and says so</h3><p>Its assistant, search and notes run on your Claude login and count against your plan. Dreams and parked tasks use only spare budget.</p></div>
+    <div class="feat"><h3>Everything it did, in one log</h3><p>Who asked, why, and what happened, including what it refused to do.</p></div>
+    <div class="feat"><h3>Notarized by Apple</h3><p>Developer ID signed, so it opens without a workaround.</p></div>
+    <div class="feat"><h3>Updates in place</h3><p>A new version takes over every tab while it runs. If the takeover fails, the old version stays and keeps your tabs.</p></div>
+  </div>
+</section>
+
+<section id="faq">
+  <p class="kick">Questions</p>
+  <h2>Before you download.</h2>
+  <div style="margin-top:24px">
+    <details><summary>What does it cost?</summary><div class="answer"><p>Miterm is free to download. You pay for Claude as you do now.</p></div></details>
+    <details><summary>What is a prompt cache, and why does it matter?</summary><div class="answer"><p>Claude Code re-sends the whole conversation with every request. While it is cached, those tokens are read at 0.1× the normal price. Once the cache expires, the next request writes all of it again at up to 2×. On a long conversation, that one message costs as much as twenty cached ones.</p></div></details>
+    <details><summary>Does it change how Claude Code works?</summary><div class="answer"><p>No. Miterm is a real terminal and <code>claude</code> runs inside it, in your zsh, bash or fish, with your plugins and settings. Miterm adds its own plugin to each launch, without writing to your settings.</p></div></details>
+    <details><summary>Does it work with an API key?</summary><div class="answer"><p>It is built for Claude plans. An API key has no plan limits to read, so the meters and everything that runs on spare budget have nothing to go on, and the assistant's calls are billed to your key.</p></div></details>
+    <details><summary>Intel Macs or older macOS?</summary><div class="answer"><p>No. Miterm needs macOS 26 on Apple silicon.</p></div></details>
+    <details><summary>Is it open source?</summary><div class="answer"><p>Not at the moment. Builds are published on <a href="https://github.com/timtux/miterm-site/releases/latest">GitHub Releases</a>.</p></div></details>
+    <details id="models"><summary>Which model for which job?</summary><div class="answer wide">
+      <p>A new session starts on the chat pick below, or on what its folder's last sessions settled on, unless you name a model yourself. After a compaction, Miterm checks whether the tab's work still fits its model, and switches it at a moment when that is cheap. Nothing is saved to your Claude Code settings, and every switch can be reverted from the inspector.</p>
+      <div class="cmpwrap"><table class="cmp models">
+        <thead><tr><th scope="col">Work</th><th scope="col">Model and effort</th><th scope="col">Why</th></tr></thead>
+        <tbody>
+        <tr><td>Coding that runs on its own (agents building to a plan)</td><td class="pick">Sonnet 5.5<span>xhigh</span></td><td>Close to the best coding results, at a fraction of the cost and time of Opus at its maximum</td></tr>
+        <tr><td>Desktop and MCP tool work (CAD, 3D, design apps)</td><td class="pick">Opus 5.5<span>high</span></td><td>Near the best result for well under half the cost of max; Sonnet costs more here, not less</td></tr>
+        <tr><td>Planning, architecture, hard reasoning, code review</td><td class="pick">Opus 5.5<span>xhigh</span></td><td>The strongest reasoning short of max, for a little over half its cost</td></tr>
+        <tr><td>A chat you follow along with</td><td class="pick">Opus 5.5<span>medium</span></td><td>Anthropic's default. You are the double-check; go to high if corrections pile up</td></tr>
+        <tr><td>Small, simple jobs (expanding a search, sorting)</td><td class="pick">Haiku 5.5<span>high</span></td><td>Far cheaper per task than Opus 5.5 on low, for a somewhat lower general score</td></tr>
+        </tbody>
+      </table></div>
+      <div class="two">
+        <div><h3>Rules of thumb</h3><ol>
+          <li><b>Cost per task, not per token.</b> A cheaper model that writes more and takes more turns can cost more per finished task.</li>
+          <li><b>Cache reads are most of the bill.</b> Cost follows turns times context size, so effort moves it more than the model's price does.</li>
+          <li><b>Switch models only at a free moment:</b> a new session, a wake, right after a compaction. Each model has its own cache. Effort can change any time and keeps the cache.</li>
+          <li><b>Raise effort</b> when Claude skips a file, doesn't run the tests or doesn't double-check its work.</li>
+        </ol></div>
+        <div><h3>Avoid</h3><ul>
+          <li><b>Medium or low effort</b> for work nobody watches.</li>
+          <li><b>Max effort</b>, unless the last few points are worth twice the cost.</li>
+          <li><b>Older models</b> (Opus 5 and 4.8, Sonnet 5 and 4.x): some level of Opus 5.5 is both better and cheaper.</li>
+          <li><b>Fable 5.1</b>: it cost more for the same work in every comparison we read.</li>
+          <li><b><code>/model &lt;name&gt;</code> and <code>/effort &lt;level&gt;</code></b>: both save as your default. For this session only, type <code>/model</code> or <code>/effort</code> alone, pick with ←/→ and press <code>s</code>.</li>
+        </ul></div>
+      </div>
+      <p class="fine" style="margin-top:18px">From public benchmarks and our own measurements, November 2026. Models change, and so will this table.</p>
+    </div></details>
+  </div>
+</section>
+
+<section class="final">
+  <div class="band">
+    <h2>Stop paying for sessions that sit idle.</h2>
+    <p>Keep your terminal habits. Lose the babysitting.</p>
+    <a class="dl" href="https://github.com/timtux/miterm-site/releases/download/v0.4/Miterm-0.4-16300b45.zip">Download Miterm 0.4</a>
+    <p class="needs" style="margin-bottom:0">Free · macOS 26 on Apple silicon · Claude Code</p>
+  </div>
+</section>
+</main>
+
 <footer><span>Miterm 0.4 · macOS 26 · Apple silicon · <a href="https://github.com/timtux/miterm-site/releases/latest">Releases</a></span><span>Not affiliated with Anthropic. Claude and Claude Code are Anthropic's.</span></footer>
 </div>
-
+<script>
+function openTarget(){var t=location.hash&&document.querySelector(location.hash);if(t&&t.tagName==='DETAILS'){t.open=true;t.scrollIntoView()}}
+addEventListener('hashchange',openTarget);openTarget();
+document.querySelectorAll('a[href="#models"]').forEach(function(a){a.addEventListener('click',function(){document.getElementById('models').open=true})});
+</script>
 </body>
 </html>
