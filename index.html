@@ -109,6 +109,10 @@ h2{font:700 clamp(30px,4.2vw,44px)/1.08 var(--display);letter-spacing:-.015em;ma
 .proof{margin:24px 0 0;padding:16px 18px;border-left:3px solid var(--led);background:var(--surface);border-radius:0 10px 10px 0;font-size:15.5px;color:var(--muted)}
 .proof b{color:var(--ink);font-weight:600}
 
+.steps{list-style:none;counter-reset:s;display:grid;grid-template-columns:repeat(3,1fr);gap:28px 36px;margin:28px 0 0;padding:0;color:var(--muted)}
+.steps li{counter-increment:s}
+.steps li::before{content:counter(s);display:block;font:700 40px/1 var(--display);color:var(--led);margin-bottom:12px}
+.steps b{display:block;color:var(--ink);font-weight:600;font-size:18px;margin-bottom:4px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 36px}
 .feat h3{font:600 17px var(--body);margin:0 0 4px}
 .feat p{margin:0;color:var(--muted);font-size:15.5px}
@@ -157,6 +161,7 @@ footer a{color:inherit}
   .split,.two{grid-template-columns:1fr;gap:30px}
   .split .media{order:2}
   .grid{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr}
   .legend{grid-template-columns:1fr;gap:8px}
   .stats{grid-template-columns:1fr;gap:28px;padding-block:44px}
   section{padding-block:52px}
@@ -165,6 +170,8 @@ footer a{color:inherit}
 @media (max-width:520px){
   .grid{grid-template-columns:1fr}
   header.top nav a:not(.small){display:none}
+  .shot{aspect-ratio:1/1;object-fit:cover;object-position:left top;margin-top:32px}
+  .legend li:last-child{display:none}
   .models thead{display:none}
   .models tr{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:12px 0;border-bottom:1px solid var(--line)}
   .models td{border:0;padding:0}
@@ -320,7 +327,8 @@ footer a{color:inherit}
 <section id="native">
   <p class="kick">Native, not a web page</p>
   <h2>Written in Swift, for the Mac.</h2>
-  <div class="cmpwrap" style="margin-top:24px"><table class="cmp">
+  <p class="intro">An 11 MB download with a real terminal underneath, so all of Claude Code keeps working, with the Mac's own notifications, windows and full screen on top.</p>
+  <div class="cmpwrap"><table class="cmp">
     <thead><tr><td></td><th scope="col" class="us">Miterm</th><th scope="col">A plain terminal</th><th scope="col">A web-based app</th></tr></thead>
     <tbody>
     <tr><th scope="row">Built with</th><td class="us">Swift and AppKit</td><td>native, but knows nothing about Claude</td><td>JavaScript in a browser shell</td></tr>
@@ -345,11 +353,22 @@ footer a{color:inherit}
   </div>
 </section>
 
+<section id="start">
+  <p class="kick">Getting started</p>
+  <h2>Nothing new to learn.</h2>
+  <ol class="steps">
+    <li><b>Download it</b>Unzip Miterm and move it to Applications. It updates itself from then on.</li>
+    <li><b>Type <code>claude</code></b>Open a tab and work as you always do, or reopen any earlier conversation with ⌘P.</li>
+    <li><b>Go do something else</b>Miterm minds the clocks and sleeps what's idle. The bell tells you when it's your move.</li>
+  </ol>
+</section>
+
 <section id="faq">
   <p class="kick">Questions</p>
   <h2>Before you download.</h2>
   <div style="margin-top:24px">
     <details><summary>What does it cost?</summary><div class="answer"><p>Miterm is free to download. You pay for Claude as you do now.</p></div></details>
+    <details><summary>Is it worth it with only a few sessions?</summary><div class="answer"><p>The more sessions you run and the longer they live, the more it saves. If you work in one short session at a time, you gain little beyond the cache clock and ⌘P search.</p></div></details>
     <details><summary>What is a prompt cache, and why does it matter?</summary><div class="answer"><p>Claude Code re-sends the whole conversation with every request. While it is cached, those tokens are read at 0.1× the normal price. Once the cache expires, the next request writes all of it again at up to 2×. On a long conversation, that one message costs as much as twenty cached ones.</p></div></details>
     <details><summary>Does it change how Claude Code works?</summary><div class="answer"><p>No. Miterm is a real terminal and <code>claude</code> runs inside it, in your zsh, bash or fish, with your plugins and settings. Miterm adds its own plugin to each launch, without writing to your settings.</p></div></details>
     <details><summary>Does it work with an API key?</summary><div class="answer"><p>It is built for Claude plans. An API key has no plan limits to read, so the meters and everything that runs on spare budget have nothing to go on, and the assistant's calls are billed to your key.</p></div></details>
