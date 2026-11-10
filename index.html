@@ -203,7 +203,7 @@ footer a{color:inherit}
     <a href="#attention">Attention</a>
     <a href="#trust">Trust</a>
     <a href="#faq">FAQ</a>
-    <a class="small" href="https://github.com/timtux/miterm-site/releases/download/v0.4/Miterm-0.4-16300b45.zip">Download</a>
+    <a class="small" href="https://github.com/timtux/miterm-site/releases/download/v0.5/Miterm-0.5-257a3639.zip">Download</a>
   </nav>
 </header>
 
@@ -213,7 +213,7 @@ footer a{color:inherit}
   <h1>Run twenty Claude Code sessions. <em>Pay for the ones that work.</em></h1>
   <p class="lede">Miterm puts idle sessions to sleep before their cache expires, keeps the rest warm, and rings only when one actually needs you.</p>
   <div class="actions">
-    <a class="dl" href="https://github.com/timtux/miterm-site/releases/download/v0.4/Miterm-0.4-16300b45.zip">Download Miterm 0.4</a>
+    <a class="dl" href="https://github.com/timtux/miterm-site/releases/download/v0.5/Miterm-0.5-257a3639.zip">Download Miterm 0.5</a>
     <a class="more" href="#cost">See how it saves &darr;</a>
   </div>
   <p class="needs">Free · Notarized by Apple · macOS 26 on Apple silicon · Runs on your Claude Code login</p>
@@ -407,7 +407,7 @@ footer a{color:inherit}
     <details><summary>Is it worth it with only a few sessions?</summary><div class="answer"><p>The more sessions you run and the longer they live, the more it saves. If you work in one short session at a time, you gain little beyond the cache clock and ⌘P search.</p></div></details>
     <details><summary>What is a prompt cache, and why does it matter?</summary><div class="answer"><p>Claude Code re-sends the whole conversation with every request. While it is cached, those tokens are read at 0.1× the normal price. Once the cache expires, the next request writes all of it again at up to 2×. On a long conversation, that one message costs as much as twenty cached ones.</p></div></details>
     <details><summary>Does it change how Claude Code works?</summary><div class="answer"><p>No. Miterm is a real terminal and <code>claude</code> runs inside it, in your zsh, bash or fish, with your plugins and settings. Miterm adds its own plugin to each launch, without writing to your settings.</p></div></details>
-    <details><summary>Does it work with an API key?</summary><div class="answer"><p>It is built for Claude plans. An API key has no plan limits to read, so the meters and everything that runs on spare budget have nothing to go on, and the assistant's calls are billed to your key.</p></div></details>
+    <details><summary>Does it work with an API key?</summary><div class="answer"><p>No, on purpose. Miterm takes <code>ANTHROPIC_API_KEY</code> out of every Claude Code it starts, so nothing it runs can bill an API account. You need a Claude plan and to be logged in to Claude Code.</p></div></details>
     <details><summary>Intel Macs or older macOS?</summary><div class="answer"><p>No. Miterm needs macOS 26 on Apple silicon.</p></div></details>
     <details><summary>Is it open source?</summary><div class="answer"><p>Not at the moment. Builds are published on <a href="https://github.com/timtux/miterm-site/releases/latest">GitHub Releases</a>.</p></div></details>
     <details id="models"><summary>Which model for which job?</summary><div class="answer wide">
@@ -446,13 +446,13 @@ footer a{color:inherit}
   <div class="band">
     <h2>Stop paying for sessions that sit idle.</h2>
     <p>Keep your terminal habits. Lose the babysitting.</p>
-    <a class="dl" href="https://github.com/timtux/miterm-site/releases/download/v0.4/Miterm-0.4-16300b45.zip">Download Miterm 0.4</a>
+    <a class="dl" href="https://github.com/timtux/miterm-site/releases/download/v0.5/Miterm-0.5-257a3639.zip">Download Miterm 0.5</a>
     <p class="needs" style="margin-bottom:0">Free · macOS 26 on Apple silicon · Claude Code</p>
   </div>
 </section>
 </main>
 
-<footer><span>Miterm 0.4 · macOS 26 · Apple silicon · <a href="https://github.com/timtux/miterm-site/releases/latest">Releases</a></span><span>Not affiliated with Anthropic. Claude and Claude Code are Anthropic's.</span></footer>
+<footer><span>Miterm 0.5 · macOS 26 · Apple silicon · <a href="https://github.com/timtux/miterm-site/releases/latest">Releases</a></span><span>Not affiliated with Anthropic. Claude and Claude Code are Anthropic's.</span></footer>
 </div>
 <script>
 function openTarget(){var t=location.hash&&document.querySelector(location.hash);if(t&&t.tagName==='DETAILS'){t.open=true;t.scrollIntoView()}}
